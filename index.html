@@ -1,8 +1,8 @@
-<html ng:app="streamerApp">
+<html ng:app="livestreamApp">
 <head>
-    <title>Streamer</title>
+    <title>LiveStream</title>
 </head>
-<body ng:controller="streamerCtrl">
+<body ng:controller="livestreamCtrl">
 <p><a href="#" ng:click="on = !on">{{on && "pause" || "resume"}}</a> <a href="#" ng:click="messages = [] ; count = 0; matches = 0">clear</a></p>
 <p>{{count}} messages processed; {{matches}} matched.</p>
 <div>
@@ -21,9 +21,9 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
 <script>
 
-angular.module('streamerApp', []);
+angular.module('livestreamApp', []);
 
-function streamerCtrl($scope) {
+function livestreamCtrl($scope) {
 
     $scope.on = 1;
     $scope.count = 0;
