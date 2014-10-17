@@ -1,0 +1,65 @@
+<html ng:app="streamerApp">
+<head>
+    <title>Streamer</title>
+</head>
+<body ng:controller="streamerCtrl">
+<p><a href="#" ng:click="on = !on">{{on && "pause" || "resume"}}</a> <a href="#" ng:click="messages = [] ; count = 0; matches = 0">clear</a></p>
+<p>{{count}} messages processed; {{matches}} matched.</p>
+<div>
+    <p><input type="text" style="width:100%" ng:model="patterns"></input></p>
+</div>
+<div>
+    <div ng:repeat="msg in messages">
+        <p>
+            <a ng:href="http://{{msg.hostname}}/wiki/{{msg.article}}" target="_blank"><strong>{{msg.article}}</strong></a> -
+            <a ng:href="http://{{msg.hostname}}/wiki/{{msg.article}}" target="_blank">{{msg.comment}}</a> -
+            <a ng:href="http://{{msg.hostname}}/w/index.php?title={{msg.article}}&action=history" target="_blank">(history)</a>
+        </p>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+<script>
+
+angular.module('streamerApp', []);
+
+function streamerCtrl($scope) {
+
+    $scope.on = 1;
+    $scope.count = 0;
+    $scope.matches = 0;
+    $scope.messages = [];
+    $scope.patterns = "";
+    if (window.location.hash.length > 1) {
+        $scope.patterns = window.location.hash.substring(1);
+    }
+
+    var handleCallback = function (msg) {
+        $scope.$apply(function () {
+            if (!$scope.on || !$scope.patterns.length) return;
+            var patterns = $scope.patterns.toLowerCase().split("|");
+            var haystack = msg.data.toLowerCase();
+            var skip = true;
+            for (var ii = 0; ii < patterns.length; ii++) {
+                if ((patterns[ii].length > 2) && (haystack.search(patterns[ii]) >= 0))
+                    skip = false;
+            }
+            if (!skip) {
+                var data = JSON.parse(msg.data);
+                var url = document.createElement('a');
+                url.href = data.diffUrl || data.languageClusterUrl;
+                data.hostname = url.hostname;
+                $scope.messages.unshift(data);
+                $scope.matches++;
+            }
+            $scope.count++;
+        });
+    }
+
+    var source = new EventSource('https://wikipedia-edits.herokuapp.com/sse');
+    source.addEventListener('message', handleCallback, false);
+}
+
+</script>
+</body>
+</html>
